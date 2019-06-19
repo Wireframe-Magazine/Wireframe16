@@ -1,0 +1,75 @@
+// Code from page 35
+
+
+#pragmaonce
+
+#include"CoreMinimal.h"
+#include"GameFramework/SaveGame.h"
+#include"cMyAwesomeSave.generated.h"
+
+UCLASS() // Include the UCLASS macro to tell the engine that this extends a base class and cannot be directly instanced in the world: it must belong to something.
+class [YOURPROJECTNAME]_API UcMyAwesomeSave : publicUSaveGame// Replace [YOURPROJECTNAME] with your project name (removing the [ and ].
+// The : public USaveGame at the ends tells the engine that we’re inheriting from USaveGame.
+{
+	GENERATED_BODY() // Tells the engine to inject the additional functions and type definitions it needs to understand our code.
+
+public: // This means that variables and functions listed below are visible to all classes and not hidden away.
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) // Adding UPROPERTY(EditAnywhere, BlueprintReadWrite) tells the compiler that the next line is variable that can be seen and edited even in Blueprints.
+	FVectorsgPlayerLocation;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite) 
+	boolsgIsPlayerDead;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	uint8sgPlayerLives;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FStringSaveSlotName; // Both SaveSlotName and UserIndex don't use the sg prefix. These are because they are required to save our game to a slot and to a user index.
+	// The above variables are optional but both SaveSlotName and UserIndex are not.
+	UPROPERTY(VisibleAnywhere)
+	uint8UserIndex;
+
+	UcMyAwesomeSave(); // This is our constructor so we can pass default values when this is created.
+};
+
+
+// Code from page 36
+
+#include"cMyAwesomeSave.h"
+
+// This is the constructor, which is fired when this is created.
+UcMyAwesomeSave::UcMyAwesomeSave()
+{
+	SaveSlotName=TEXT("ChangeMe");
+	UserIndex = 0;
+}
+
+
+#include"CoreMinimal.h"
+#include"GameFramework/Actor.h"
+#include"cMyAwesomeSave.h"
+#include"Kismet/GameplayStatics.h"
+#include"MyAwesomeActor.generated.h"
+
+
+voidSaveToSlot();	
+	
+voidLoadFromSlot();
+
+FVectorExampleVector;
+
+
+voidAMyAwesomeActor::SaveToSlot()
+{
+	UcMyAwesomeSave* SaveGameRef = Cast<UcMyAwesomeSave>(UGameplayStatics::CreateSaveGameObject(UcMyAwesomeSave::StaticClass())); // Create our Save Game and store it as "SaveGameRef"
+	SaveGameRef->sgPlayerLocation=ExampleVector; // Set the Save Game version of our Variable here.
+	UGameplayStatics::SaveGameToSlot(SaveGameRef, SaveGameRef->SaveSlotName, SaveGameRef->UserIndex); // You can use a custom Slot Name or User Index instead - Just like the Blueprint version!
+}
+
+voidAMyAwesomeActor::LoadFromSlot()
+{
+	UcMyAwesomeSave* LoadGameRef = Cast<UcMyAwesomeSave>(UGameplayStatics::CreateSaveGameObject(UcMyAwesomeSave::StaticClass())); // Load our Save Game and store it as "LoadGameRef"
+	LoadGameRef = Cast<UcMyAwesomeSave>(UGameplayStatics::LoadGameFromSlot(LoadGameRef->SaveSlotName, LoadGameRef->UserIndex)); // Load the Slot / User just like we did in the Blueprint.
+	ExampleVector=LoadGameRef->sgPlayerLocation; // Update our Variable!
+}
